@@ -32,7 +32,7 @@ define(
         var Storage = require('./Storage');
         var Animation = require('./animation/Animation');
 
-        var Group = reuqire('./Group');
+        var Group = require('./Group');
         var Rectangle = require('./shape/Rectangle');
         var Circle = require('./shape/Circle');
         var Image = require('./shape/Image');
