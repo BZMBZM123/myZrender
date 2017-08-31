@@ -32,14 +32,26 @@ define(
         var Storage = require('./Storage');
         var Animation = require('./animation/Animation');
 
-        var _instances = {};    // ZRender实例map索引
+        var Group = reuqire('./Group');
+        var Rectangle = require('./shape/Rectangle');
+        var Circle = require('./shape/Circle');
+        var Image = require('./shape/Image');
+        var BezierCurve = require('./shape/BezierCurve');
+
+        var _instances = {}; // ZRender实例map索引
 
         /**
          * @exports zrender
          * @author Kener (@Kener-林峰, kener.linfeng@gmail.com)
          *         pissang (https://www.github.com/pissang)
          */
-        var zrender = {};
+        var zrender = {
+            Group: Group,
+            Rectangle: Rectangle,
+            Circle: Circle,
+            Image: Image,
+            BezierCurve: BezierCurve
+        };
         /**
          * @type {string}
          */
@@ -66,11 +78,10 @@ define(
         // 在_instances里的索引也会删除了
         // 管生就得管死，可以通过zrender.dispose(zr)销毁指定ZRender实例
         // 当然也可以直接zr.dispose()自己销毁
-        zrender.dispose = function (zr) {
+        zrender.dispose = function(zr) {
             if (zr) {
                 zr.dispose();
-            }
-            else {
+            } else {
                 for (var key in _instances) {
                     _instances[key].dispose();
                 }
@@ -85,7 +96,7 @@ define(
          * @param {string} id ZRender对象索引
          * @return {module:zrender/ZRender}
          */
-        zrender.getInstance = function (id) {
+        zrender.getInstance = function(id) {
             return _instances[id];
         };
 
@@ -98,13 +109,13 @@ define(
          *
          * @param {string} id ZRender对象索引
          */
-        zrender.delInstance = function (id) {
+        zrender.delInstance = function(id) {
             delete _instances[id];
             return zrender;
         };
 
         function getFrameCallback(zrInstance) {
-            return function () {
+            return function() {
                 if (zrInstance._needsRefreshNextFrame) {
                     zrInstance.refresh();
                 }
@@ -147,7 +158,7 @@ define(
             this.animation.start();
 
             var self = this;
-            this.painter.refreshNextFrame = function () {
+            this.painter.refreshNextFrame = function() {
                 self.refreshNextFrame();
             };
 
@@ -158,7 +169,7 @@ define(
             var self = this;
             var storage = this.storage;
             var oldDelFromMap = storage.delFromMap;
-            storage.delFromMap = function (elId) {
+            storage.delFromMap = function(elId) {
                 var el = storage.get(elId);
                 self.stopAnimation(el);
                 oldDelFromMap.call(storage, elId);
@@ -169,7 +180,7 @@ define(
          * 获取实例唯一标识
          * @return {string}
          */
-        ZRender.prototype.getId = function () {
+        ZRender.prototype.getId = function() {
             return this.id;
         };
 
@@ -178,7 +189,7 @@ define(
          * @deprecated Use {@link module:zrender/ZRender.prototype.addElement} instead
          * @param {module:zrender/shape/Base} shape 形状对象，可用属性全集，详见各shape
          */
-        ZRender.prototype.addShape = function (shape) {
+        ZRender.prototype.addShape = function(shape) {
             this.addElement(shape);
             return this;
         };
@@ -198,7 +209,7 @@ define(
          * @deprecated Use {@link module:zrender/ZRender.prototype.delElement} instead
          * @param {string} shapeId 形状对象唯一标识
          */
-        ZRender.prototype.delShape = function (shapeId) {
+        ZRender.prototype.delShape = function(shapeId) {
             this.delElement(shapeId);
             return this;
         };
@@ -208,7 +219,7 @@ define(
          * @deprecated Use {@link module:zrender/ZRender.prototype.delElement} instead
          * @param {string} groupId
          */
-        ZRender.prototype.delGroup = function (groupId) {
+        ZRender.prototype.delGroup = function(groupId) {
             this.delElement(groupId);
             return this;
         };
@@ -219,7 +230,7 @@ define(
          * @param {string} shapeId 形状对象唯一标识
          * @param {Object} shape 形状对象
          */
-        ZRender.prototype.modShape = function (shapeId, shape) {
+        ZRender.prototype.modShape = function(shapeId, shape) {
             this.modElement(shapeId, shape);
             return this;
         };
@@ -230,7 +241,7 @@ define(
          * @param {string} groupId
          * @param {Object} group
          */
-        ZRender.prototype.modGroup = function (groupId, group) {
+        ZRender.prototype.modGroup = function(groupId, group) {
             this.modElement(groupId, group);
             return this;
         };
@@ -239,7 +250,7 @@ define(
          * 添加元素
          * @param  {string|module:zrender/Group|module:zrender/shape/Base} el
          */
-        ZRender.prototype.addElement = function (el) {
+        ZRender.prototype.addElement = function(el) {
             this.storage.addRoot(el);
             this._needsRefreshNextFrame = true;
             return this;
@@ -249,7 +260,7 @@ define(
          * 删除元素
          * @param  {string|module:zrender/Group|module:zrender/shape/Base} el
          */
-        ZRender.prototype.delElement = function (el) {
+        ZRender.prototype.delElement = function(el) {
             this.storage.delRoot(el);
             this._needsRefreshNextFrame = true;
             return this;
@@ -266,7 +277,7 @@ define(
          * @param  {string|module:zrender/Group|module:zrender/shape/Base} el
          * @param {Object} [params]
          */
-        ZRender.prototype.modElement = function (el, params) {
+        ZRender.prototype.modElement = function(el, params) {
             this.storage.mod(el, params);
             this._needsRefreshNextFrame = true;
             return this;
@@ -287,7 +298,7 @@ define(
          * @param {boolean} [config.zoomable=false] 层是否支持鼠标缩放操作
          * @param {boolean} [config.panable=false] 层是否支持鼠标平移操作
          */
-        ZRender.prototype.modLayer = function (zLevel, config) {
+        ZRender.prototype.modLayer = function(zLevel, config) {
             this.painter.modLayer(zLevel, config);
             this._needsRefreshNextFrame = true;
             return this;
@@ -298,7 +309,7 @@ define(
          * 
          * @param {Object} shape 形状对象
          */
-        ZRender.prototype.addHoverShape = function (shape) {
+        ZRender.prototype.addHoverShape = function(shape) {
             this.storage.addHover(shape);
             return this;
         };
@@ -308,7 +319,7 @@ define(
          * 
          * @param {Function} callback  渲染结束后回调函数
          */
-        ZRender.prototype.render = function (callback) {
+        ZRender.prototype.render = function(callback) {
             this.painter.render(callback);
             this._needsRefreshNextFrame = false;
             return this;
@@ -319,7 +330,7 @@ define(
          * 
          * @param {Function} callback  视图更新后回调函数
          */
-        ZRender.prototype.refresh = function (callback) {
+        ZRender.prototype.refresh = function(callback) {
             this.painter.refresh(callback);
             this._needsRefreshNextFrame = false;
             return this;
@@ -332,12 +343,12 @@ define(
             this._needsRefreshNextFrame = true;
             return this;
         };
-        
+
         /**
          * 绘制高亮层
          * @param {Function} callback  视图更新后回调函数
          */
-        ZRender.prototype.refreshHover = function (callback) {
+        ZRender.prototype.refreshHover = function(callback) {
             this.painter.refreshHover(callback);
             return this;
         };
@@ -348,7 +359,7 @@ define(
          * @param {Array.<module:zrender/shape/Base>} shapeList 需要更新的图形列表
          * @param {Function} callback  视图更新后回调函数
          */
-        ZRender.prototype.refreshShapes = function (shapeList, callback) {
+        ZRender.prototype.refreshShapes = function(shapeList, callback) {
             this.painter.refreshShapes(shapeList, callback);
             return this;
         };
@@ -374,7 +385,7 @@ define(
          *         .done(function(){ // Animation done })
          *         .start()
          */
-        ZRender.prototype.animate = function (el, path, loop) {
+        ZRender.prototype.animate = function(el, path, loop) {
             var self = this;
 
             if (typeof(el) === 'string') {
@@ -394,17 +405,16 @@ define(
                     if (prop) {
                         target = prop;
                     }
-                }
-                else {
+                } else {
                     target = el;
                 }
 
                 if (!target) {
                     log(
-                        'Property "'
-                        + path
-                        + '" is not existed in element '
-                        + el.id
+                        'Property "' +
+                        path +
+                        '" is not existed in element ' +
+                        el.id
                     );
                     return;
                 }
@@ -416,10 +426,10 @@ define(
                 var animators = el.__animators;
 
                 var animator = this.animation.animate(target, { loop: loop })
-                    .during(function () {
+                    .during(function() {
                         self.modShape(el);
                     })
-                    .done(function () {
+                    .done(function() {
                         var idx = util.indexOf(el.__animators, animator);
                         if (idx >= 0) {
                             animators.splice(idx, 1);
@@ -428,8 +438,7 @@ define(
                 animators.push(animator);
 
                 return animator;
-            }
-            else {
+            } else {
                 log('Element not existed');
             }
         };
@@ -438,7 +447,7 @@ define(
          * 停止动画对象的动画
          * @param  {string|module:zrender/Group|module:zrender/shape/Base} el
          */
-        ZRender.prototype.stopAnimation = function (el) {
+        ZRender.prototype.stopAnimation = function(el) {
             if (el.__animators) {
                 var animators = el.__animators;
                 var len = animators.length;
@@ -453,7 +462,7 @@ define(
         /**
          * 停止所有动画
          */
-        ZRender.prototype.clearAnimation = function () {
+        ZRender.prototype.clearAnimation = function() {
             this.animation.clear();
             return this;
         };
@@ -463,7 +472,7 @@ define(
          * 
          * @param {Object=} loadingEffect loading效果对象
          */
-        ZRender.prototype.showLoading = function (loadingEffect) {
+        ZRender.prototype.showLoading = function(loadingEffect) {
             this.painter.showLoading(loadingEffect);
             return this;
         };
@@ -471,7 +480,7 @@ define(
         /**
          * loading结束
          */
-        ZRender.prototype.hideLoading = function () {
+        ZRender.prototype.hideLoading = function() {
             this.painter.hideLoading();
             return this;
         };
@@ -533,23 +542,23 @@ define(
             this.handler.un(eventName, eventHandler);
             return this;
         };
-        
+
         /**
          * 事件触发
          * 
          * @param {string} eventName 事件名称，resize，hover，drag，etc
          * @param {event=} event event dom事件对象
          */
-        ZRender.prototype.trigger = function (eventName, event) {
+        ZRender.prototype.trigger = function(eventName, event) {
             this.handler.trigger(eventName, event);
             return this;
         };
-        
+
 
         /**
          * 清除当前ZRender下所有类图的数据和显示，clear后MVC和已绑定事件均还存在在，ZRender可用
          */
-        ZRender.prototype.clear = function () {
+        ZRender.prototype.clear = function() {
             this.storage.delRoot();
             this.painter.clear();
             return this;
@@ -558,18 +567,18 @@ define(
         /**
          * 释放当前ZR实例（删除包括dom，数据、显示和事件绑定），dispose后ZR不可用
          */
-        ZRender.prototype.dispose = function () {
+        ZRender.prototype.dispose = function() {
             this.animation.stop();
-            
+
             this.clear();
             this.storage.dispose();
             this.painter.dispose();
             this.handler.dispose();
 
-            this.animation = 
-            this.storage = 
-            this.painter = 
-            this.handler = null;
+            this.animation =
+                this.storage =
+                this.painter =
+                this.handler = null;
 
             // 释放后告诉全局删除对自己的索引，没想到啥好方法
             zrender.delInstance(this.id);
