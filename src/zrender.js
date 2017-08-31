@@ -37,6 +37,7 @@ define(
         var Circle = require('./shape/Circle');
         var Image = require('./shape/Image');
         var BezierCurve = require('./shape/BezierCurve');
+        var Text = require('./shape/Text.js');
 
         var _instances = {}; // ZRender实例map索引
 
@@ -50,7 +51,8 @@ define(
             Rectangle: Rectangle,
             Circle: Circle,
             Image: Image,
-            BezierCurve: BezierCurve
+            BezierCurve: BezierCurve,
+            Text: Text
         };
         /**
          * @type {string}
