@@ -173,8 +173,10 @@ define(
             var oldDelFromMap = storage.delFromMap;
             storage.delFromMap = function(elId) {
                 var el = storage.get(elId);
-                self.stopAnimation(el);
-                oldDelFromMap.call(storage, elId);
+                if(el){
+                    self.stopAnimation(el);
+                    oldDelFromMap.call(storage, elId);
+                }
             };
         };
 
