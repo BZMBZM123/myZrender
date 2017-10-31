@@ -36,6 +36,7 @@ define(
         var Rectangle = require('./shape/Rectangle');
         var Circle = require('./shape/Circle');
         var Image = require('./shape/Image');
+        var Line = require('./shape/Line.js');
         var BezierCurve = require('./shape/BezierCurve');
         var Text = require('./shape/Text.js');
 
@@ -52,7 +53,8 @@ define(
             Circle: Circle,
             Image: Image,
             BezierCurve: BezierCurve,
-            Text: Text
+            Text: Text,
+            Line: Line
         };
         /**
          * @type {string}
